@@ -1,39 +1,25 @@
 // content.js
-// Lightweight bridge for auto-injection based on domain settings
-// Runs in isolated world, only queries background for domain status
+// Lightweight bridge for auto-injection
+// Only runs on enabled domains (dynamically registered)
 
 'use strict';
 
 (function () {
-    // Get current domain
-    const domain = window.location.hostname;
+    // This script only runs on enabled domains, so directly request injection
+    console.log('[Content] Running on enabled domain, requesting auto-injection');
 
-    console.log('[Content] Checking domain:', domain);
-
-    // Query background to check if this domain is enabled for auto-injection
     chrome.runtime.sendMessage(
-        { action: 'checkDomain', domain: domain },
+        { action: 'injectScriptAuto' },
         (response) => {
             if (chrome.runtime.lastError) {
-                console.error('[Content] Error checking domain:', chrome.runtime.lastError);
+                console.error('[Content] Error requesting injection:', chrome.runtime.lastError);
                 return;
             }
 
-            if (response && response.enabled) {
-                console.log('[Content] Domain is enabled, requesting auto-injection');
-                // Domain is enabled, request injection (background will get tabId from sender)
-                chrome.runtime.sendMessage(
-                    { action: 'injectScriptAuto' },
-                    (injectResponse) => {
-                        if (injectResponse && injectResponse.success) {
-                            console.log('[Content] Auto-injection successful');
-                        } else {
-                            console.error('[Content] Auto-injection failed:', injectResponse?.error);
-                        }
-                    }
-                );
+            if (response && response.success) {
+                console.log('[Content] Auto-injection successful');
             } else {
-                console.log('[Content] Domain not enabled for auto-injection');
+                console.error('[Content] Auto-injection failed:', response?.error);
             }
         }
     );
