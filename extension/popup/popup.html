@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JS Right-Click Enabler</title>
+  <style>
+    body {
+      width: 300px;
+      padding: 15px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      margin: 0;
+    }
+
+    h1 {
+      font-size: 16px;
+      margin: 0 0 10px 0;
+      color: #333;
+    }
+
+    .domain-info {
+      background: #f5f5f5;
+      padding: 10px;
+      border-radius: 4px;
+      margin-bottom: 15px;
+      font-size: 13px;
+      word-break: break-all;
+    }
+
+    .domain-label {
+      font-weight: 600;
+      color: #666;
+      margin-bottom: 5px;
+    }
+
+    .domain-value {
+      color: #0066cc;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 8px;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background-color 0.2s;
+    }
+
+    .btn-primary {
+      background: #0066cc;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #0052a3;
+    }
+
+    .btn-secondary {
+      background: #28a745;
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      background: #218838;
+    }
+
+    .btn-tertiary {
+      background: #6c757d;
+      color: white;
+    }
+
+    .btn-tertiary:hover {
+      background: #5a6268;
+    }
+
+    .status {
+      margin-top: 10px;
+      padding: 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .status.success {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .status.error {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .status.info {
+      background: #d1ecf1;
+      color: #0c5460;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>JS Right-Click Enabler</h1>
+
+  <div class="domain-info">
+    <div class="domain-label">現在のドメイン:</div>
+    <div class="domain-value" id="currentDomain">読み込み中...</div>
+    <div class="domain-label" style="margin-top: 8px;">状態:</div>
+    <div class="domain-value" id="domainStatus" style="font-weight: 600;">確認中...</div>
+  </div>
+
+  <button id="enableDomain" class="btn-primary">このドメインで有効化</button>
+  <button id="disableDomain" class="btn-secondary" style="display: none;">このドメインで無効化</button>
+  <button id="close" class="btn-tertiary">閉じる</button>
+
+  <div id="status" class="status" style="display: none;"></div>
+
+  <script src="popup.js"></script>
+</body>
+
+</html>

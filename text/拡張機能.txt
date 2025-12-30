@@ -1,0 +1,97 @@
+結論から言うと、**可能です。**
+
+Chrome拡張機能として自作すれば、特定のドメイン（例：`example.com`）にアクセスした瞬間に、このコードを自動実行させることができます。
+
+専門的なツールを使わなくても、自分のPCだけで完結する「簡易的な自作拡張機能」の作り方を解説します。
+
+---
+
+## Chrome拡張機能の作り方
+
+適当な名前のフォルダ（例：`copy-unlocker`）を作成し、その中に以下の2つのファイルを作成してください。
+
+### 1. `manifest.json`（設定ファイル）
+
+拡張機能の「設計図」です。ここで適用するサイト（ドメイン）を指定します。
+
+```json
+{
+  "manifest_version": 3,
+  "name": "Auto Copy Unlocker",
+  "version": "1.0",
+  "content_scripts": [
+    {
+      "matches": ["https://example.com/*", "https://*.another-site.jp/*"],
+      "js": ["content.js"],
+      "run_at": "document_start"
+    }
+  ]
+}
+
+```
+
+* **`matches`**: 効果を発揮させたいURLを記述します。`*` はワイルドカードです。
+* **`run_at`**: `document_start` にすることで、サイト側のスクリプトが動く前にこちらのコードを割り込ませます。
+
+### 2. `content.js`（本体）
+
+中身は先ほどのブックマークレットとほぼ同じですが、拡張機能用に最適化したものです。
+
+```javascript
+(function() {
+    // 1. CSSを注入
+    const style = document.createElement("style");
+    style.innerHTML = "* { user-select: auto !important; -webkit-user-select: auto !important; }";
+    document.documentElement.appendChild(style);
+
+    const forbiddenEvents = ["selectstart", "copy", "contextmenu", "dragstart", "mousedown"];
+
+    // 2. イベントの強制停止
+    forbiddenEvents.forEach(type => {
+        document.addEventListener(type, e => e.stopImmediatePropagation(), true);
+    });
+
+    // 3. ページ内のaddEventListenerを監視
+    const script = document.createElement('script');
+    script.textContent = `
+        (function() {
+            const f = ["selectstart", "copy", "contextmenu", "dragstart", "mousedown"];
+            const a = EventTarget.prototype.addEventListener;
+            EventTarget.prototype.addEventListener = function(t, l, o) {
+                if (!f.includes(t)) a.call(this, t, l, o);
+            };
+        })();
+    `;
+    document.documentElement.appendChild(script);
+})();
+
+```
+
+---
+
+## 導入の手順
+
+1. **Chromeの拡張機能画面を開く**
+* ブラウザのアドレスバーに `chrome://extensions/` と入力して移動します。
+
+
+2. **デベロッパーモードをONにする**
+* 右上の「デベロッパー モード」スイッチをオンにします。
+
+
+3. **フォルダを読み込む**
+* 左上の「**パッケージ化されていない拡張機能を読み込む**」をクリックし、先ほど作成したフォルダを選択します。
+
+
+
+これだけで、`matches` に書いたサイトを訪れるたびに、**自動でコピー禁止が解除された状態**になります。
+
+---
+
+## 仕組みの補足：なぜ `content.js` で `script` タグを作っているのか
+
+拡張機能には「分離された世界（Isolated World）」という仕組みがあり、通常の `content.js` からはサイト本体の JavaScript（`EventTarget` など）を直接書き換えることができません。
+
+そのため、上記コードでは **「サイトの内部に直接 `<script>` タグを投げ込む」** という手法（インジェクション）をとっています。これにより、サイト側の全スクリプトに対して「検問」を敷くことが可能になっています。
+
+まずは特定の1サイトで試してみたいですか？それとも、あらゆるサイトで共通して動くように設定したいですか？
